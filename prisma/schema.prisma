@@ -1,0 +1,375 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client"
+  output   = "../lib/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Profile {
+  id        String   @id @db.Uuid
+  fullName  String?
+  phone     String?
+  role      UserRole @default(CUSTOMER)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+    addresses      Address[]
+  orders         Order[]
+  reviews        Review[]
+  cart           Cart?
+  wishlist       WishlistItem[]
+  notifications  Notification[]
+
+  @@index([role])
+}
+
+enum UserRole {
+  CUSTOMER
+  ADMIN
+}
+
+model Address {
+  id        String   @id @default(uuid()) @db.Uuid
+  profileId String   @db.Uuid
+
+  label     String?
+  address   String
+  city      String
+  state     String
+  phone     String?
+  isDefault Boolean  @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  profile Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  @@index([profileId])
+}
+
+model Category {
+  id        String    @id @default(uuid()) @db.Uuid
+  name      String    @unique
+  slug      String    @unique
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  products Product[]
+}
+
+model Product {
+  id          String   @id @default(uuid()) @db.Uuid
+  categoryId  String   @db.Uuid
+
+  name        String
+  slug        String   @unique
+  description String?
+  sku         String   @unique
+  price       Int
+  isActive    Boolean  @default(true)
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+category      Category        @relation(fields: [categoryId], references: [id])
+variants      ProductVariant[]
+images        ProductImage[]
+orderItems    OrderItem[]
+reviews       Review[]
+cartItems     CartItem[]
+wishlistItems WishlistItem[]
+
+  @@index([categoryId])
+  @@index([isActive])
+}
+
+model ProductVariant {
+  id        String   @id @default(uuid()) @db.Uuid
+  productId String   @db.Uuid
+
+  size      String
+  colour    String
+  sku       String   @unique
+  stock     Int      @default(0)
+  price     Int?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  cartItems  CartItem[]
+  orderItems OrderItem[]
+
+  @@unique([productId, colour, size])
+  @@index([productId])
+}
+
+model ProductImage {
+  id        String   @id @default(uuid()) @db.Uuid
+  productId String   @db.Uuid
+
+  url       String
+  altText   String?
+  sortOrder Int      @default(0)
+  isPrimary Boolean  @default(false)
+
+  createdAt DateTime @default(now())
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([productId])
+}
+
+model Cart {
+  id        String   @id @default(uuid()) @db.Uuid
+  profileId String   @unique @db.Uuid
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  profile Profile   @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  items   CartItem[]
+
+  @@index([profileId])
+}
+
+model CartItem {
+  id        String   @id @default(uuid()) @db.Uuid
+  cartId    String   @db.Uuid
+  productId String   @db.Uuid
+  variantId String   @db.Uuid
+
+  quantity  Int      @default(1)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  cart    Cart           @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  product Product        @relation(fields: [productId], references: [id])
+  variant ProductVariant @relation(fields: [variantId], references: [id])
+
+  @@unique([cartId, variantId])
+  @@index([cartId])
+  @@index([productId])
+  @@index([variantId])
+}
+
+model WishlistItem {
+  id        String   @id @default(uuid()) @db.Uuid
+  profileId String   @db.Uuid
+  productId String   @db.Uuid
+
+  createdAt DateTime @default(now())
+
+  profile Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([profileId, productId])
+  @@index([profileId])
+  @@index([productId])
+}
+
+model Order {
+  id        String   @id @default(uuid()) @db.Uuid
+  profileId String?  @db.Uuid
+
+  orderNumber String @unique
+
+  status      OrderStatus @default(PENDING)
+  subtotal    Int
+  deliveryFee Int
+  total       Int
+
+  fullName String
+  email    String
+  phone    String
+
+  address String
+  city    String
+  state   String
+  notes   String?
+
+  paymentBankName      String?
+paymentAccountName   String?
+paymentAccountNumber String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+    profile       Profile?       @relation(fields: [profileId], references: [id], onDelete: SetNull)
+  items         OrderItem[]
+  payment       Payment?
+  notifications Notification[]
+
+  @@index([profileId])
+  @@index([status])
+  @@index([createdAt])
+}
+
+enum OrderStatus {
+  PENDING
+  PROCESSING
+  SHIPPED
+  DELIVERED
+  CANCELLED
+}
+
+model OrderItem {
+  id        String   @id @default(uuid()) @db.Uuid
+  orderId   String   @db.Uuid
+  productId String   @db.Uuid
+  variantId String?  @db.Uuid
+
+  productName String
+  sku         String
+  size        String
+  colour      String
+
+  quantity  Int
+  unitPrice Int
+  total     Int
+
+  order   Order          @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product Product        @relation(fields: [productId], references: [id])
+  variant ProductVariant? @relation(fields: [variantId], references: [id], onDelete: SetNull)
+
+  @@index([orderId])
+  @@index([productId])
+  @@index([variantId])
+}
+
+model Payment {
+  id      String @id @default(uuid()) @db.Uuid
+  orderId String @unique @db.Uuid
+
+  method PaymentMethod @default(BANK_TRANSFER)
+  status PaymentStatus @default(PENDING)
+
+  amount Int
+
+  reference String?
+  paidAt    DateTime?
+  notes     String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@index([status])
+  @@index([reference])
+}
+
+enum PaymentMethod {
+  BANK_TRANSFER
+  PAYSTACK
+}
+
+enum PaymentStatus {
+  PENDING
+  SUCCESSFUL
+  FAILED
+  REFUNDED
+}
+
+model Review {
+  id        String   @id @default(uuid()) @db.Uuid
+  profileId String   @db.Uuid
+  productId String   @db.Uuid
+
+  rating  Int
+  comment String?
+  isApproved Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  profile Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([profileId, productId])
+  @@index([productId])
+  @@index([isApproved])
+}
+
+model Notification {
+  id      String @id @default(uuid()) @db.Uuid
+
+  profileId String? @db.Uuid
+
+  type    NotificationType
+  title   String
+  message String
+
+  orderId String? @db.Uuid
+
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  profile Profile? @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  order   Order?   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@index([profileId])
+  @@index([isRead])
+  @@index([createdAt])
+  @@index([orderId])
+}
+
+enum NotificationType {
+  NEW_ORDER
+  PAYMENT_CONFIRMED
+  ORDER_STATUS_UPDATE
+  LOW_STOCK
+  GENERAL
+}
+
+model DeliveryZone {
+  id        String   @id @default(uuid()) @db.Uuid
+  name      String   @unique
+  fee       Int
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  states DeliveryZoneState[]
+}
+
+model DeliveryZoneState {
+  id             String @id @default(uuid()) @db.Uuid
+  deliveryZoneId String @db.Uuid
+  state          String @unique
+
+  deliveryZone DeliveryZone @relation(fields: [deliveryZoneId], references: [id], onDelete: Cascade)
+
+  @@index([deliveryZoneId])
+}
+
+model StoreSetting {
+  id        String   @id @default(uuid()) @db.Uuid
+
+  key       String   @unique
+  value     String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model ContentSection {
+  id        String   @id @default(uuid()) @db.Uuid
+
+  key       String   @unique
+  title     String?
+  content   String?
+  imageUrl  String?
+  isActive  Boolean  @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
