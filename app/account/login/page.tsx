@@ -144,6 +144,12 @@ const { error } =
             />
           </div>
 
+          <div className="account-forgot-password">
+  <Link href="/account/forgot-password">
+    Forgot your password?
+  </Link>
+</div>
+
           {error && (
             <p
               className="account-form-error"

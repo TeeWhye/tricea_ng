@@ -9858,3 +9858,389 @@ a {
     margin-left: 0;
   }
 }
+
+/* =========================================
+   Admin Users
+   ========================================= */
+
+.admin-users-list {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  overflow: hidden;
+  border: 1px solid #d9c9c3;
+  border-radius: 14px;
+  background: #fffdfb;
+  box-shadow: 0 8px 30px rgba(28, 24, 25, 0.05);
+}
+
+.admin-user-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 28px;
+  padding: 22px 24px;
+  background: #fffdfb;
+  border-bottom: 1px solid #e7deda;
+  transition:
+    background 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.admin-user-row:last-child {
+  border-bottom: none;
+}
+
+.admin-user-row:hover {
+  background: #fdf8f5;
+  box-shadow: inset 3px 0 0 #731f32;
+}
+
+.admin-user-info {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.admin-user-info strong {
+  color: #1c1819;
+  font-family: var(--font-inter), sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.admin-user-email {
+  color: #756c6e;
+  font-family: var(--font-inter), sans-serif;
+  font-size: 13px;
+  line-height: 1.4;
+  word-break: break-word;
+}
+
+.admin-user-role {
+  display: inline-flex;
+  align-items: center;
+  align-self: flex-start;
+  width: fit-content;
+  margin-top: 3px;
+  padding: 5px 10px;
+  border: 1px solid #d8b8c0;
+  border-radius: 999px;
+  background: #f8e9ed;
+  color: #5a1826;
+  font-family: var(--font-inter), sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.admin-user-actions {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.admin-user-action {
+  min-height: 40px;
+  padding: 0 17px;
+  border: 1px solid #5a1826;
+  border-radius: 6px;
+  background: #5a1826;
+  color: #fffdfb;
+  font-family: var(--font-inter), sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.admin-user-action:hover:not(:disabled) {
+  border-color: #731f32;
+  background: #731f32;
+  transform: translateY(-1px);
+}
+
+.admin-user-action:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.admin-user-action-danger {
+  border-color: #a74761;
+  background: transparent;
+  color: #731f32;
+}
+
+.admin-user-action-danger:hover:not(:disabled) {
+  border-color: #731f32;
+  background: #731f32;
+  color: #fffdfb;
+}
+
+/* Empty / loading state */
+
+.admin-users-list + .admin-empty-state {
+  border-radius: 14px;
+}
+
+/* Mobile */
+
+@media (max-width: 600px) {
+  .admin-users-list {
+    border-radius: 12px;
+  }
+
+  .admin-user-row {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 18px;
+    padding: 20px;
+  }
+
+  .admin-user-info {
+    width: 100%;
+  }
+
+  .admin-user-actions {
+    width: 100%;
+  }
+
+  .admin-user-action {
+    width: 100%;
+  }
+}
+
+.admin-users-summary {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.admin-users-stat {
+  padding: 20px 22px;
+  border: 1px solid #e7deda;
+  border-radius: 12px;
+  background: #fffdfb;
+  box-shadow: 0 6px 24px rgba(28, 24, 25, 0.04);
+}
+
+.admin-users-stat span {
+  display: block;
+  margin-bottom: 8px;
+  color: #756c6e;
+  font-family: var(--font-inter), sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.admin-users-stat strong {
+  color: #5a1826;
+  font-family: var(--font-playfair), serif;
+  font-size: 30px;
+  font-weight: 600;
+  line-height: 1;
+}
+
+@media (max-width: 600px) {
+  .admin-users-summary {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* =========================================
+   Forgot Password
+   ========================================= */
+
+.account-page:has(.account-heading h1) {
+  min-height: calc(100vh - 80px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 72px 24px;
+  background: #f8f3ef;
+}
+
+.account-page:has(.account-heading h1) .account-page-inner {
+  width: 100%;
+  max-width: 520px;
+  padding: 48px;
+  border: 1px solid #e7deda;
+  background: #fffdfb;
+  box-shadow: 0 20px 60px rgba(28, 24, 25, 0.06);
+}
+
+.account-page:has(.account-heading h1) .account-heading {
+  margin-bottom: 32px;
+}
+
+.account-page:has(.account-heading h1) .account-heading h1 {
+  margin: 0 0 18px;
+  color: #1c1819;
+  font-family: var(--font-playfair), serif;
+  font-size: clamp(38px, 5vw, 52px);
+  font-weight: 500;
+  line-height: 1.05;
+  letter-spacing: -0.025em;
+}
+
+.account-page:has(.account-heading h1) .account-heading > p:last-child {
+  max-width: 440px;
+  color: #756c6e;
+  font-family: var(--font-inter), sans-serif;
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+.account-page:has(.account-heading h1) .account-form {
+  gap: 20px;
+}
+
+.account-page:has(.account-heading h1) .account-form-group label {
+  color: #1c1819;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.account-page:has(.account-heading h1) .account-form-group input {
+  min-height: 50px;
+  border: 1px solid #d9c9c3;
+  background: #fff;
+  color: #1c1819;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.account-page:has(.account-heading h1) .account-form-group input:focus {
+  outline: none;
+  border-color: #731f32;
+  box-shadow: 0 0 0 3px rgba(115, 31, 50, 0.08);
+}
+
+.account-page:has(.account-heading h1) .account-submit-button {
+  min-height: 50px;
+  background: #5a1826;
+  border: 1px solid #5a1826;
+  color: #fffdfb;
+  transition:
+    background 0.2s ease,
+    transform 0.2s ease;
+}
+
+.account-page:has(.account-heading h1) .account-submit-button:hover:not(:disabled) {
+  background: #731f32;
+  border-color: #731f32;
+  transform: translateY(-1px);
+}
+
+.account-page:has(.account-heading h1) .account-form-success {
+  padding: 16px 18px;
+  border: 1px solid #d8b8c0;
+  background: #f8e9ed;
+}
+
+.account-page:has(.account-heading h1) .account-form-success strong {
+  display: block;
+  margin-bottom: 5px;
+  color: #5a1826;
+  font-size: 13px;
+}
+
+.account-page:has(.account-heading h1) .account-form-success p {
+  margin: 0;
+  color: #756c6e;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.account-page:has(.account-heading h1) .account-register {
+  margin-top: 28px;
+  padding-top: 24px;
+  border-top: 1px solid #e7deda;
+}
+
+.account-page:has(.account-heading h1) .account-register p {
+  color: #756c6e;
+}
+
+.account-page:has(.account-heading h1) .account-register a {
+  color: #731f32;
+  font-weight: 600;
+}
+
+@media (max-width: 600px) {
+  .account-page:has(.account-heading h1) {
+    min-height: calc(100vh - 64px);
+    padding: 40px 16px;
+    align-items: flex-start;
+  }
+
+  .account-page:has(.account-heading h1) .account-page-inner {
+    padding: 32px 22px;
+  }
+
+  .account-page:has(.account-heading h1) .account-heading h1 {
+    font-size: 38px;
+  }
+}
+
+.account-forgot-password {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: -8px;
+  margin-bottom: 4px;
+}
+
+.account-forgot-password a {
+  color: #731f32;
+  font-family: var(--font-inter), sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  text-decoration: none;
+  transition:
+    color 0.2s ease,
+    opacity 0.2s ease;
+}
+
+.account-forgot-password a:hover {
+  color: #5a1826;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.admin-login-forgot-password {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: -8px;
+  margin-bottom: 4px;
+}
+
+.admin-login-forgot-password a {
+  color: #731f32;
+  font-family: var(--font-inter), sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  text-decoration: none;
+  transition:
+    color 0.2s ease,
+    opacity 0.2s ease;
+}
+
+.admin-login-forgot-password a:hover {
+  color: #5a1826;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}

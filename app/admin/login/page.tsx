@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
@@ -88,6 +89,12 @@ export default function AdminLoginPage() {
               required
             />
           </label>
+
+          <div className="admin-login-forgot-password">
+  <Link href="/account/forgot-password">
+    Forgot your password?
+  </Link>
+</div>
 
           {error && (
             <p

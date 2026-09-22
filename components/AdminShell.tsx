@@ -5,13 +5,14 @@ import { usePathname } from "next/navigation";
 import {
   ArrowLeft,
   Box,
+  ClipboardList,
   LayoutDashboard,
   LogOut,
   Menu,
   Settings,
   Tag,
+  Users,
   X,
-  ClipboardList,
 } from "lucide-react";
 import { useState } from "react";
 
@@ -92,6 +93,11 @@ export default function AdminShell({
             <span>Categories</span>
           </Link>
 
+          <Link href="/admin/users">
+  <Users size={18} strokeWidth={1.6} />
+  <span>Admin Users</span>
+</Link>
+
           <Link href="/admin/settings">
             <Settings size={18} strokeWidth={1.6} />
             <span>Settings</span>
@@ -157,6 +163,14 @@ export default function AdminShell({
               <Tag size={19} strokeWidth={1.6} />
               <span>Categories</span>
             </Link>
+
+            <Link
+  href="/admin/users"
+  onClick={closeMobileMenu}
+>
+  <Users size={19} strokeWidth={1.6} />
+  <span>Admin Users</span>
+</Link>
 
             <Link
               href="/admin/settings"
