@@ -1,5 +1,7 @@
 import Link from "next/link";
+
 import ProductCard from "@/components/ProductCard";
+
 import { prisma } from "@/lib/prisma";
 
 type ShopPageProps = {
@@ -8,28 +10,15 @@ type ShopPageProps = {
   }>;
 };
 
-const categoryInfo: Record<
-  string,
-  {
-    name: string;
-    description: string;
-  }
-> = {
-  "palm-slippers": {
-    name: "Palm Slippers",
-    description:
-      "Effortless everyday footwear crafted for comfort, character, and modern living.",
-  },
-  sandals: {
-    name: "Sandals",
-    description:
-      "Refined silhouettes designed to bring ease and sophistication to every step.",
-  },
-  "handmade-shoes": {
-    name: "Handmade Shoes",
-    description:
-      "Distinctive footwear shaped by craftsmanship, detail, and African-inspired design.",
-  },
+const categoryDescriptions: Record<string, string> = {
+  "palm-slippers":
+    "Effortless everyday footwear crafted for comfort, character, and modern living.",
+
+  sandals:
+    "Refined silhouettes designed to bring ease and sophistication to every step.",
+
+  "handmade-shoes":
+    "Distinctive footwear shaped by craftsmanship, detail, and African-inspired design.",
 };
 
 export default async function ShopPage({
@@ -37,10 +26,20 @@ export default async function ShopPage({
 }: ShopPageProps) {
   const { category } = await searchParams;
 
+  const categories = await prisma.category.findMany({
+    orderBy: {
+      createdAt: "asc",
+    },
+  });
+
   const selectedCategory =
-    category && categoryInfo[category]
+    category && categories.some((item) => item.slug === category)
       ? category
       : undefined;
+
+  const selectedCategoryData = selectedCategory
+    ? categories.find((item) => item.slug === selectedCategory)
+    : undefined;
 
   const products = await prisma.product.findMany({
     where: {
@@ -67,12 +66,11 @@ export default async function ShopPage({
     },
   });
 
-  const pageTitle = selectedCategory
-    ? categoryInfo[selectedCategory].name
-    : "Footwear";
+  const pageTitle = selectedCategoryData?.name ?? "Footwear";
 
-  const pageDescription = selectedCategory
-    ? categoryInfo[selectedCategory].description
+  const pageDescription = selectedCategoryData
+    ? categoryDescriptions[selectedCategoryData.slug] ??
+      "Thoughtfully crafted footwear designed for modern life."
     : "Discover thoughtfully crafted footwear inspired by African craftsmanship and designed for modern life.";
 
   return (
@@ -81,9 +79,7 @@ export default async function ShopPage({
         <div className="shop-header-inner">
           <div>
             <p className="section-eyebrow">
-              {selectedCategory
-                ? "THE TRICEA COLLECTION"
-                : "THE TRICEA COLLECTION"}
+              THE TRICEA COLLECTION
             </p>
 
             <h1>
@@ -109,38 +105,19 @@ export default async function ShopPage({
               All
             </Link>
 
-            <Link
-              href="/shop?category=palm-slippers"
-              className={
-                selectedCategory === "palm-slippers"
-                  ? "active"
-                  : ""
-              }
-            >
-              Palm Slippers
-            </Link>
-
-            <Link
-              href="/shop?category=sandals"
-              className={
-                selectedCategory === "sandals"
-                  ? "active"
-                  : ""
-              }
-            >
-              Sandals
-            </Link>
-
-            <Link
-              href="/shop?category=handmade-shoes"
-              className={
-                selectedCategory === "handmade-shoes"
-                  ? "active"
-                  : ""
-              }
-            >
-              Handmade Shoes
-            </Link>
+            {categories.map((item) => (
+              <Link
+                key={item.id}
+                href={`/shop?category=${item.slug}`}
+                className={
+                  selectedCategory === item.slug
+                    ? "active"
+                    : ""
+                }
+              >
+                {item.name}
+              </Link>
+            ))}
           </div>
 
           <p className="shop-product-count">
