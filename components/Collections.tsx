@@ -1,32 +1,44 @@
 import Link from "next/link";
 
-const collections = [
+import { prisma } from "@/lib/prisma";
+
+const collectionInfo: Record<
+  string,
   {
-    title: "Palm Slippers",
+    subtitle: string;
+    className: string;
+  }
+> = {
+  "premium-palm-slides": {
     subtitle: "Everyday essentials",
-    href: "/shop?category=palm-slippers",
     className: "collection-palm",
   },
-  {
-    title: "Sandals",
+
+  sandals: {
     subtitle: "Effortless sophistication",
-    href: "/shop?category=sandals",
     className: "collection-sandals",
   },
-  {
-    title: "Handmade Shoes",
+
+  "handmade-shoes": {
     subtitle: "Crafted with character",
-    href: "/shop?category=handmade-shoes",
     className: "collection-handmade",
   },
-];
+};
 
-export default function Collections() {
+export default async function Collections() {
+  const categories = await prisma.category.findMany({
+    orderBy: {
+      createdAt: "asc",
+    },
+  });
+
   return (
     <section className="collections">
       <div className="collections-heading">
         <div>
-          <p className="section-eyebrow">EXPLORE THE COLLECTIONS</p>
+          <p className="section-eyebrow">
+            EXPLORE THE COLLECTIONS
+          </p>
 
           <h2>
             Made for every
@@ -42,27 +54,34 @@ export default function Collections() {
       </div>
 
       <div className="collections-grid">
-        {collections.map((collection, index) => (
-          <Link
-            key={collection.title}
-            href={collection.href}
-            className={`collection-card ${collection.className}`}
-          >
-            <div className="collection-number">
-              0{index + 1}
-            </div>
+        {categories.map((category, index) => {
+  const info = collectionInfo[category.slug] ?? {
+    subtitle: "Discover the collection",
+    className: `collection-${index + 1}`,
+  };
 
-            <div className="collection-card-content">
-              <p>{collection.subtitle}</p>
+  return (
+            <Link
+              key={category.id}
+              href={`/shop?category=${category.slug}`}
+              className={`collection-card ${info.className}`}
+            >
+              <div className="collection-number">
+                {String(index + 1).padStart(2, "0")}
+              </div>
 
-              <h3>{collection.title}</h3>
+              <div className="collection-card-content">
+                <p>{info.subtitle}</p>
 
-              <span>
-                Shop Collection <strong>→</strong>
-              </span>
-            </div>
-          </Link>
-        ))}
+                <h3>{category.name}</h3>
+
+                <span>
+                  Shop Collection <strong>→</strong>
+                </span>
+              </div>
+            </Link>
+          );
+        })}
       </div>
     </section>
   );

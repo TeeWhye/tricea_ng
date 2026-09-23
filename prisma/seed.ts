@@ -18,16 +18,18 @@ async function main() {
   // CATEGORIES
   // ─────────────────────────────────────────────
 
-  const palmSlippers = await prisma.category.upsert({
-    where: {
-      slug: "palm-slippers",
-    },
-    update: {},
-    create: {
-      name: "Palm Slippers",
-      slug: "palm-slippers",
-    },
-  });
+  const premiumPalmSlides = await prisma.category.upsert({
+  where: {
+    slug: "premium-palm-slides",
+  },
+  update: {
+    name: "Premium Palm Slides",
+  },
+  create: {
+    name: "Premium Palm Slides",
+    slug: "premium-palm-slides",
+  },
+});
 
   const sandals = await prisma.category.upsert({
     where: {
@@ -52,7 +54,7 @@ async function main() {
   });
 
   console.log("Categories created:");
-  console.log(palmSlippers.name);
+  console.log(premiumPalmSlides.name);
   console.log(sandals.name);
   console.log(handmadeShoes.name);
 
@@ -72,7 +74,7 @@ async function main() {
         "A refined everyday slide combining comfort, character, and effortless style.",
       sku: "TRC-BCS-001",
       price: 35000,
-      categoryId: palmSlippers.id,
+      categoryId: premiumPalmSlides.id,
       isActive: true,
     },
   });
@@ -92,7 +94,7 @@ async function main() {
         "A distinctive botanical-inspired slide designed for effortless everyday wear.",
       sku: "TRC-GBS-001",
       price: 45000,
-      categoryId: palmSlippers.id,
+      categoryId: premiumPalmSlides.id,
       isActive: true,
     },
   });
@@ -112,7 +114,7 @@ async function main() {
         "A modern platform slide combining sculptural design, comfort, and everyday versatility.",
       sku: "TRC-OPS-001",
       price: 40000,
-      categoryId: palmSlippers.id,
+      categoryId: premiumPalmSlides.id,
       isActive: true,
     },
   });

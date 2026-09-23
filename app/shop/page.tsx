@@ -11,7 +11,7 @@ type ShopPageProps = {
 };
 
 const categoryDescriptions: Record<string, string> = {
-  "palm-slippers":
+  "premium-palm-slides":
     "Effortless everyday footwear crafted for comfort, character, and modern living.",
 
   sandals:

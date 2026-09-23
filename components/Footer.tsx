@@ -1,19 +1,31 @@
 import Link from "next/link";
+
 import { prisma } from "@/lib/prisma";
 
 export default async function Footer() {
-  const storeNameSetting =
-    await prisma.storeSetting.findUnique({
+  const [storeNameSetting, categories] = await Promise.all([
+    prisma.storeSetting.findUnique({
       where: {
         key: "store_name",
       },
       select: {
         value: true,
       },
-    });
+    }),
 
-  const storeName =
-    storeNameSetting?.value || "Tricea NG";
+    prisma.category.findMany({
+      orderBy: {
+        createdAt: "asc",
+      },
+      select: {
+        id: true,
+        name: true,
+        slug: true,
+      },
+    }),
+  ]);
+
+  const storeName = storeNameSetting?.value || "Tricea NG";
 
   return (
     <footer className="site-footer">
@@ -40,17 +52,14 @@ export default async function Footer() {
             All Footwear
           </Link>
 
-          <Link href="/shop?category=palm-slippers">
-            Palm Slippers
-          </Link>
-
-          <Link href="/shop?category=sandals">
-            Sandals
-          </Link>
-
-          <Link href="/shop?category=handmade-shoes">
-            Handmade Shoes
-          </Link>
+          {categories.map((category) => (
+            <Link
+              key={category.id}
+              href={`/shop?category=${category.slug}`}
+            >
+              {category.name}
+            </Link>
+          ))}
         </div>
 
         <div className="site-footer-column">
