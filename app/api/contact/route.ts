@@ -82,7 +82,7 @@ export async function POST(request: Request) {
     }
 
     const { error } = await resend.emails.send({
-      from: "Tricea NG <onboarding@resend.dev>",
+      from: "Tricea NG <support@triceang.com>",
       to: supportEmail,
       replyTo: email,
       subject: `Tricea NG Contact: ${subject}`,
