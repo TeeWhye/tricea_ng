@@ -117,3 +117,50 @@ if (phone.length > 30) {
     profile,
   });
 }
+
+export async function POST() {
+  const supabase = await createClient();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return NextResponse.json(
+      { message: "You must be signed in." },
+      { status: 401 }
+    );
+  }
+
+  const fullName =
+    user.user_metadata?.fullName ||
+    user.user_metadata?.full_name ||
+    user.user_metadata?.name ||
+    user.email ||
+    "Tricea Customer";
+
+  const profile = await prisma.profile.upsert({
+    where: {
+      id: user.id,
+    },
+    create: {
+      id: user.id,
+      fullName,
+      role: "CUSTOMER",
+    },
+    update: {
+      fullName,
+    },
+    select: {
+      id: true,
+      fullName: true,
+      phone: true,
+      role: true,
+    },
+  });
+
+  return NextResponse.json({
+    message: "Profile ready.",
+    profile,
+  });
+}

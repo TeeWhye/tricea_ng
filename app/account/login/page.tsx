@@ -56,11 +56,24 @@ const { error } =
   });
 
       if (error) {
-        throw error;
-      }
+  throw error;
+}
 
-      router.push("/account");
-      router.refresh();
+const profileResponse = await fetch(
+  "/api/account/profile",
+  {
+    method: "POST",
+  }
+);
+
+if (!profileResponse.ok) {
+  throw new Error(
+    "Unable to create your account profile."
+  );
+}
+
+router.push("/account");
+router.refresh();
     } catch {
   setError("Unable to sign in. Please check your details and try again.");
 } finally {
