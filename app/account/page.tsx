@@ -11,8 +11,8 @@ export default async function AccountPage() {
   } = await supabase.auth.getUser();
 
   if (!user) {
-    redirect("/account/login");
-  }
+  redirect("/account/login?error=session-missing");
+}
 
   const profile = await prisma.profile.findUnique({
     where: {
@@ -26,8 +26,8 @@ export default async function AccountPage() {
   });
 
   if (!profile) {
-    redirect("/account/login");
-  }
+  redirect("/account/login?error=profile-missing");
+}
 
   return (
     <main className="account-dashboard">
