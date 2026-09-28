@@ -9,6 +9,7 @@ export async function POST(request: Request) {
   const requestUrl = new URL(request.url);
 
   return NextResponse.redirect(
-    new URL("/account/login", requestUrl.origin)
+    new URL("/account/login", requestUrl.origin),
+    303
   );
 }
