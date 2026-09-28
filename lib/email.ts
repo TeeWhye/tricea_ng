@@ -99,3 +99,71 @@ export async function sendNewOrderEmail(order: NewOrderEmailData) {
     throw new Error(error.message);
   }
 }
+
+export async function sendOrderConfirmationEmail(
+  order: NewOrderEmailData & {
+    paymentBankName: string;
+    paymentAccountName: string;
+    paymentAccountNumber: string;
+  }
+) {
+  if (!process.env.RESEND_API_KEY) {
+    throw new Error("RESEND_API_KEY is not configured.");
+  }
+
+  const itemLines = order.items
+    .map(
+      (item) =>
+        `${item.productName} | ${item.colour} | Size ${item.size} | Qty: ${item.quantity} | ₦${item.unitPrice.toLocaleString()} each | ₦${item.total.toLocaleString()}`
+    )
+    .join("\n");
+
+  const { error } = await resend.emails.send({
+    from: "Tricea NG <support@triceang.com>",
+    to: order.email,
+    subject: `Order Confirmed: ${order.orderNumber}`,
+    text: [
+      `Hello ${order.fullName},`,
+      "",
+      "Thank you for shopping with Tricea NG.",
+      "Your order has been received successfully.",
+      "",
+      "ORDER DETAILS",
+      `Order Number: ${order.orderNumber}`,
+      "",
+      "ITEMS",
+      itemLines,
+      "",
+      "ORDER SUMMARY",
+      `Subtotal: ₦${order.subtotal.toLocaleString()}`,
+      `Delivery Fee: ₦${order.deliveryFee.toLocaleString()}`,
+      `Total: ₦${order.total.toLocaleString()}`,
+      "",
+      "DELIVERY DETAILS",
+      `Address: ${order.address}`,
+      `City: ${order.city}`,
+      `State: ${order.state}`,
+      "",
+      "PAYMENT",
+      "Method: Bank Transfer",
+      `Status: ${order.paymentStatus}`,
+      "",
+      "BANK TRANSFER DETAILS",
+      `Bank: ${order.paymentBankName}`,
+      `Account Name: ${order.paymentAccountName}`,
+      `Account Number: ${order.paymentAccountNumber}`,
+      "",
+      "Please use your order number as your payment reference where applicable.",
+      "",
+      "We will process your order once your payment has been confirmed.",
+      "",
+      "Thank you for choosing Tricea NG.",
+      "",
+      "— Tricea NG",
+    ].join("\n"),
+  });
+
+  if (error) {
+    throw new Error(error.message);
+  }
+}

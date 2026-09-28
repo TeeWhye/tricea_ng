@@ -1,7 +1,10 @@
 import { prisma } from "@/lib/prisma";
 import { getDeliveryFee } from "@/lib/delivery";
 import { createClient } from "@/lib/supabase/server";
-import { sendNewOrderEmail } from "@/lib/email";
+import {
+  sendNewOrderEmail,
+  sendOrderConfirmationEmail,
+} from "@/lib/email";
 
 type OrderItemInput = {
   productId: string;
@@ -422,6 +425,36 @@ paymentAccountNumber: bankDetails.account_number,
       console.error("New order email notification failed:", emailError);
     }
 
+    try {
+  await sendOrderConfirmationEmail({
+    orderNumber: order.orderNumber,
+    fullName: order.fullName,
+    email: order.email,
+    phone: order.phone,
+    address: order.address,
+    city: order.city,
+    state: order.state,
+    notes: order.notes,
+    subtotal: Number(order.subtotal),
+    deliveryFee: Number(order.deliveryFee),
+    total: Number(order.total),
+    paymentStatus: order.payment?.status ?? "PENDING",
+   paymentBankName: bankDetails.bank_name,
+paymentAccountName: bankDetails.account_name,
+paymentAccountNumber: bankDetails.account_number,
+    items: order.items.map((item) => ({
+      productName: item.productName,
+      sku: item.sku,
+      size: item.size,
+      colour: item.colour,
+      quantity: item.quantity,
+      unitPrice: Number(item.unitPrice),
+      total: Number(item.total),
+    })),
+  });
+} catch (emailError) {
+  console.error("Customer order confirmation email failed:", emailError);
+}
 
     return Response.json(
       {
