@@ -7,6 +7,7 @@ import { prisma } from "@/lib/prisma";
 export async function GET(request: Request) {
   const requestUrl = new URL(request.url);
 
+  const flowId = requestUrl.searchParams.get("sb_flow_id");
   const code = requestUrl.searchParams.get("code");
   const tokenHash = requestUrl.searchParams.get("token_hash");
   const type = requestUrl.searchParams.get(
@@ -29,7 +30,10 @@ export async function GET(request: Request) {
   // Google OAuth / PKCE
   if (code) {
     const { error } =
-      await supabase.auth.exchangeCodeForSession(code);
+  await supabase.auth.exchangeCodeForSession(
+    code,
+    flowId ? { flowId } : undefined
+  );
 
     authError = error;
   }
