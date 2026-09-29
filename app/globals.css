@@ -10244,3 +10244,147 @@ a {
   text-decoration: underline;
   text-underline-offset: 3px;
 }
+
+.admin-clear-orders-button {
+  border: 1px solid rgba(115, 31, 50, 0.35);
+  background: transparent;
+  color: #731f32;
+  padding: 0.75rem 1rem;
+  font: inherit;
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.admin-clear-orders-button:hover {
+  background: #731f32;
+  color: #fff;
+  border-color: #731f32;
+}
+
+.admin-clear-orders-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  background: rgba(28, 24, 25, 0.58);
+}
+
+.admin-clear-orders-modal {
+  width: min(100%, 520px);
+  background: #fffdfb;
+  padding: 2rem;
+  box-shadow: 0 24px 70px rgba(28, 24, 25, 0.2);
+}
+
+.admin-clear-orders-modal h2 {
+  margin: 0.35rem 0 1rem;
+  font-family: "Playfair Display", serif;
+  font-size: clamp(1.8rem, 4vw, 2.4rem);
+  font-weight: 500;
+}
+
+.admin-clear-orders-modal p {
+  margin: 0 0 1rem;
+  color: #756c6e;
+  line-height: 1.65;
+}
+
+.admin-clear-orders-warning {
+  color: #731f32 !important;
+  font-weight: 600;
+}
+
+.admin-clear-orders-label {
+  display: block;
+  margin: 1.5rem 0 0.6rem;
+  color: #1c1819;
+  font-size: 0.85rem;
+  line-height: 1.5;
+}
+
+.admin-clear-orders-input {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid #e7deda;
+  background: #fff;
+  padding: 0.85rem 0.9rem;
+  color: #1c1819;
+  font: inherit;
+  outline: none;
+}
+
+.admin-clear-orders-input:focus {
+  border-color: #731f32;
+}
+
+.admin-clear-orders-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+}
+
+.admin-clear-orders-cancel,
+.admin-clear-orders-confirm {
+  border: 0;
+  padding: 0.8rem 1rem;
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.admin-clear-orders-cancel {
+  background: #f8f3ef;
+  color: #1c1819;
+}
+
+.admin-clear-orders-confirm {
+  background: #731f32;
+  color: #fff;
+}
+
+.admin-clear-orders-confirm:disabled,
+.admin-clear-orders-cancel:disabled,
+.admin-clear-orders-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.admin-clear-orders-confirm:disabled {
+  background: #756c6e;
+}
+
+@media (max-width: 600px) {
+  .admin-section-heading {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .admin-clear-orders-button {
+    width: 100%;
+  }
+
+  .admin-clear-orders-modal {
+    padding: 1.5rem;
+  }
+
+  .admin-clear-orders-actions {
+    flex-direction: column-reverse;
+  }
+
+  .admin-clear-orders-cancel,
+  .admin-clear-orders-confirm {
+    width: 100%;
+  }
+}

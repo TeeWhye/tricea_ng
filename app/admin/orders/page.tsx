@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { createClient } from "@/lib/supabase/server";
+import ClearOrderHistoryButton from "./ClearOrderHistoryButton";
 
 export default async function AdminOrdersPage() {
   const supabase = await createClient();
@@ -83,17 +84,21 @@ export default async function AdminOrdersPage() {
 
         <section className="admin-orders-page-section">
           <div className="admin-section-heading">
-            <div>
-              <p className="section-eyebrow">
-                ORDER HISTORY
-              </p>
+  <div>
+    <p className="section-eyebrow">
+      ORDER HISTORY
+    </p>
 
-              <h2>
-                {orders.length}{" "}
-                {orders.length === 1 ? "Order" : "Orders"}
-              </h2>
-            </div>
-          </div>
+    <h2>
+      {orders.length}{" "}
+      {orders.length === 1 ? "Order" : "Orders"}
+    </h2>
+  </div>
+
+  <ClearOrderHistoryButton
+    orderCount={orders.length}
+  />
+</div>
 
           {orders.length > 0 ? (
             <div className="admin-orders-table-wrapper">
