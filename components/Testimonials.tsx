@@ -52,10 +52,6 @@ export default function Testimonials() {
           </article>
         ))}
       </div>
-
-      <p className="testimonial-placeholder-note">
-        * Placeholder testimonials — replace with verified customer reviews.
-      </p>
     </section>
   );
 }
