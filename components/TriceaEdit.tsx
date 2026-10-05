@@ -15,6 +15,11 @@ export default async function TriceaEdit() {
         },
         take: 1,
       },
+      variants: {
+  select: {
+    stock: true,
+  },
+},
     },
     orderBy: {
       createdAt: "desc",

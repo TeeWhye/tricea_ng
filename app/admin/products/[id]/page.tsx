@@ -10,6 +10,7 @@ import AdminDeleteVariantButton from "@/components/AdminDeleteVariantButton";
 import AdminProductImageUpload from "@/components/AdminProductImageUpload";
 import AdminSetPrimaryImageButton from "@/components/AdminSetPrimaryImageButton";
 import AdminDeleteProductImageButton from "@/components/AdminDeleteProductImageButton";
+import AdminDeleteProductButton from "@/components/AdminDeleteProductButton";
 
 type AdminProductPageProps = {
   params: Promise<{
@@ -354,6 +355,28 @@ export default async function AdminProductPage({
               </table>
             </div>
           </section>
+
+          <section className="admin-order-card admin-danger-zone">
+  <div>
+    <p className="section-eyebrow">
+      DANGER ZONE
+    </p>
+
+    <h2>Delete Product</h2>
+
+    <p>
+      Permanently remove this product from the
+      store. Products with existing order history
+      cannot be deleted.
+    </p>
+  </div>
+
+  <AdminDeleteProductButton
+    productId={product.id}
+    productName={product.name}
+  />
+</section>
+
         </div>
       </div>
     </main>

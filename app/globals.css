@@ -10388,3 +10388,212 @@ a {
     width: 100%;
   }
 }
+
+/* =========================================
+   OUT OF STOCK PRODUCT
+   ========================================= */
+
+.product-card-image {
+  position: relative;
+}
+
+/* Out of stock badge */
+.product-stock-badge {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  z-index: 5;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 8px 12px;
+
+  background: var(--burgundy);
+  color: #ffffff;
+
+  font-family: "Inter", sans-serif;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  line-height: 1;
+  text-transform: uppercase;
+
+  border-radius: 2px;
+
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+
+/* Slightly soften unavailable products */
+.product-card.out-of-stock .product-image {
+  opacity: 0.9;
+  filter: saturate(0.9);
+}
+
+.product-card.out-of-stock .product-image-link:hover .product-image {
+  transform: none;
+}
+
+/* =========================================
+   ADMIN PRODUCT DANGER ZONE
+   ========================================= */
+
+.admin-danger-zone {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  margin-top: 24px;
+  border: 1px solid rgba(90, 24, 38, 0.2);
+}
+
+.admin-danger-zone h2 {
+  margin: 6px 0 8px;
+}
+
+.admin-danger-zone p:not(.section-eyebrow) {
+  max-width: 620px;
+  margin: 0;
+  color: var(--muted);
+}
+
+/* Delete button */
+.admin-delete-product-button,
+.admin-danger-action {
+  border: 0;
+  cursor: pointer;
+  background: var(--burgundy);
+  color: #fff;
+  font-family: "Inter", sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  transition:
+    opacity 0.2s ease,
+    transform 0.2s ease;
+}
+
+.admin-delete-product-button {
+  flex-shrink: 0;
+  padding: 12px 18px;
+}
+
+.admin-delete-product-button:hover,
+.admin-danger-action:hover:not(:disabled) {
+  opacity: 0.88;
+}
+
+.admin-delete-product-button:active,
+.admin-danger-action:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+/* Modal */
+.admin-delete-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 24px;
+
+  background: rgba(28, 24, 25, 0.55);
+}
+
+.admin-delete-modal {
+  width: min(100%, 500px);
+  padding: 32px;
+
+  background: var(--surface);
+  border: 1px solid var(--border);
+
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.2);
+}
+
+.admin-delete-modal h2 {
+  margin: 8px 0 14px;
+}
+
+.admin-delete-modal > p:not(.section-eyebrow) {
+  color: var(--muted);
+  line-height: 1.7;
+}
+
+.admin-delete-modal label {
+  display: block;
+  margin-top: 24px;
+  margin-bottom: 8px;
+
+  color: var(--foreground);
+  font-size: 13px;
+}
+
+.admin-delete-modal input {
+  width: 100%;
+  padding: 13px 14px;
+
+  border: 1px solid var(--border);
+  background: #fff;
+
+  color: var(--foreground);
+  font-family: "Inter", sans-serif;
+  font-size: 14px;
+
+  outline: none;
+}
+
+.admin-delete-modal input:focus {
+  border-color: var(--burgundy);
+}
+
+.admin-delete-error {
+  margin-top: 12px;
+  color: var(--burgundy);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.admin-delete-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.admin-danger-action {
+  padding: 12px 18px;
+}
+
+.admin-danger-action:disabled,
+.admin-delete-product-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+@media (max-width: 700px) {
+  .admin-danger-zone {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .admin-delete-product-button {
+    width: 100%;
+  }
+
+  .admin-delete-modal {
+    padding: 24px;
+  }
+
+  .admin-delete-modal-actions {
+    flex-direction: column-reverse;
+  }
+
+  .admin-delete-modal-actions button {
+    width: 100%;
+  }
+}

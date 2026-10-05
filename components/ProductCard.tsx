@@ -16,6 +16,9 @@ type ProductCardProps = {
       url: string;
       altText: string | null;
     }[];
+    variants: {
+      stock: number;
+    }[];
   };
 };
 
@@ -84,7 +87,10 @@ export default function ProductCard({
       }
 
       setWishlisted(data.wishlisted);
-window.dispatchEvent(new Event("wishlist-updated"));
+
+      window.dispatchEvent(
+        new Event("wishlist-updated")
+      );
     } catch {
       // Keep the current UI state if the request fails.
     }
@@ -92,9 +98,25 @@ window.dispatchEvent(new Event("wishlist-updated"));
 
   const image = product.images[0];
 
+  const isOutOfStock =
+    product.variants.length === 0 ||
+    product.variants.every(
+      (variant) => variant.stock <= 0
+    );
+
   return (
-    <article className="product-card">
+    <article
+      className={`product-card ${
+        isOutOfStock ? "out-of-stock" : ""
+      }`}
+    >
       <div className="product-card-image">
+        {isOutOfStock && (
+          <span className="product-stock-badge">
+            OUT OF STOCK
+          </span>
+        )}
+
         <button
           type="button"
           className={`product-wishlist ${
@@ -110,7 +132,9 @@ window.dispatchEvent(new Event("wishlist-updated"));
           <Heart
             size={18}
             strokeWidth={1.5}
-            fill={wishlisted ? "currentColor" : "none"}
+            fill={
+              wishlisted ? "currentColor" : "none"
+            }
           />
         </button>
 

@@ -33,7 +33,8 @@ export default async function ShopPage({
   });
 
   const selectedCategory =
-    category && categories.some((item) => item.slug === category)
+    category &&
+    categories.some((item) => item.slug === category)
       ? category
       : undefined;
 
@@ -59,6 +60,11 @@ export default async function ShopPage({
           isPrimary: true,
         },
         take: 1,
+      },
+      variants: {
+        select: {
+          stock: true,
+        },
       },
     },
     orderBy: {

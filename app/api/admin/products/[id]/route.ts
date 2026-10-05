@@ -333,3 +333,123 @@ if (
 );
   }
 }
+
+export async function DELETE(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const { id } = await params;
+
+    const supabase = await createClient();
+
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+      return Response.json(
+        {
+          success: false,
+          message: "Unauthorized.",
+        },
+        { status: 401 }
+      );
+    }
+
+    const profile = await prisma.profile.findUnique({
+      where: {
+        id: user.id,
+      },
+      select: {
+        role: true,
+      },
+    });
+
+    if (!profile || profile.role !== "ADMIN") {
+      return Response.json(
+        {
+          success: false,
+          message: "Forbidden.",
+        },
+        { status: 403 }
+      );
+    }
+
+    const product = await prisma.product.findUnique({
+      where: {
+        id,
+      },
+      select: {
+        id: true,
+        name: true,
+        _count: {
+          select: {
+            orderItems: true,
+          },
+        },
+      },
+    });
+
+    if (!product) {
+      return Response.json(
+        {
+          success: false,
+          message: "Product not found.",
+        },
+        { status: 404 }
+      );
+    }
+
+    if (product._count.orderItems > 0) {
+      return Response.json(
+        {
+          success: false,
+          message:
+            "This product cannot be deleted because it is attached to existing order history. Deactivate it instead.",
+        },
+        { status: 409 }
+      );
+    }
+
+    await prisma.product.delete({
+      where: {
+        id,
+      },
+    });
+
+    return Response.json({
+      success: true,
+      message: "Product deleted successfully.",
+    });
+  } catch (error) {
+    console.error(
+      "Admin product deletion failed:",
+      error
+    );
+
+    if (
+      error &&
+      typeof error === "object" &&
+      "code" in error &&
+      error.code === "P2003"
+    ) {
+      return Response.json(
+        {
+          success: false,
+          message:
+            "This product cannot be deleted because it is still referenced by other records. Deactivate it instead.",
+        },
+        { status: 409 }
+      );
+    }
+
+    return Response.json(
+      {
+        success: false,
+        message: "Unable to delete product.",
+      },
+      { status: 500 }
+    );
+  }
+}

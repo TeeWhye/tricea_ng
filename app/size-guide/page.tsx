@@ -92,57 +92,57 @@ export default function SizeGuidePage() {
               </thead>
 
               <tbody>
-                <tr>
-                  <td>36</td>
-                  <td>36</td>
-                  <td>23.0 cm</td>
-                </tr>
-                <tr>
-                  <td>37</td>
-                  <td>37</td>
-                  <td>23.7 cm</td>
-                </tr>
-                <tr>
-                  <td>38</td>
-                  <td>38</td>
-                  <td>24.3 cm</td>
-                </tr>
-                <tr>
-                  <td>39</td>
-                  <td>39</td>
-                  <td>25.0 cm</td>
-                </tr>
-                <tr>
-                  <td>40</td>
-                  <td>40</td>
-                  <td>25.7 cm</td>
-                </tr>
-                <tr>
-                  <td>41</td>
-                  <td>41</td>
-                  <td>26.3 cm</td>
-                </tr>
-                <tr>
-                  <td>42</td>
-                  <td>42</td>
-                  <td>27.0 cm</td>
-                </tr>
-                <tr>
-                  <td>43</td>
-                  <td>43</td>
-                  <td>27.7 cm</td>
-                </tr>
-                <tr>
-                  <td>44</td>
-                  <td>44</td>
-                  <td>28.3 cm</td>
-                </tr>
-                <tr>
-                  <td>45</td>
-                  <td>45</td>
-                  <td>29.0 cm</td>
-                </tr>
-              </tbody>
+  <tr>
+    <td>38</td>
+    <td>38</td>
+    <td>24.3 cm</td>
+  </tr>
+  <tr>
+    <td>39</td>
+    <td>39</td>
+    <td>25.0 cm</td>
+  </tr>
+  <tr>
+    <td>40</td>
+    <td>40</td>
+    <td>25.7 cm</td>
+  </tr>
+  <tr>
+    <td>41</td>
+    <td>41</td>
+    <td>26.3 cm</td>
+  </tr>
+  <tr>
+    <td>42</td>
+    <td>42</td>
+    <td>27.0 cm</td>
+  </tr>
+  <tr>
+    <td>43</td>
+    <td>43</td>
+    <td>27.7 cm</td>
+  </tr>
+  <tr>
+    <td>44</td>
+    <td>44</td>
+    <td>28.3 cm</td>
+  </tr>
+  <tr>
+    <td>45</td>
+    <td>45</td>
+    <td>29.0 cm</td>
+  </tr>
+  <tr>
+    <td>46</td>
+    <td>46</td>
+    <td>29.7 cm</td>
+  </tr>
+  <tr>
+    <td>47</td>
+    <td>47</td>
+    <td>30.4 cm</td>
+  </tr>
+</tbody>
             </table>
           </div>
         </div>

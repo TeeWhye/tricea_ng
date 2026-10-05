@@ -83,16 +83,24 @@ export default function AdminCreateVariantForm({
             Size
           </label>
 
-          <input
-            id="variant-size"
-            type="text"
-            value={size}
-            onChange={(event) =>
-              setSize(event.target.value)
-            }
-            placeholder="e.g. 40"
-            required
-          />
+          <select
+  id="variant-size"
+  value={size}
+  onChange={(event) => setSize(event.target.value)}
+  required
+>
+  <option value="">Select size</option>
+  <option value="38">38</option>
+  <option value="39">39</option>
+  <option value="40">40</option>
+  <option value="41">41</option>
+  <option value="42">42</option>
+  <option value="43">43</option>
+  <option value="44">44</option>
+  <option value="45">45</option>
+  <option value="46">46</option>
+  <option value="47">47</option>
+</select>
         </div>
 
         <div className="admin-form-field">
