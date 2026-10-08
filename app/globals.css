@@ -70,12 +70,14 @@ a {
    ========================================================= */
 
 .navbar {
-  position: sticky;
+  position: fixed;
   top: 0;
-  z-index: 50;
+  left: 0;
+  z-index: 9999;
   width: 100%;
+
   background: rgba(248, 243, 239, 0.94);
-  backdrop-filter: blur(12px);
+  backdrop-filter: blur(5px);
   border-bottom: 1px solid var(--border);
 }
 
@@ -239,6 +241,10 @@ a {
    ========================================================= */
 
 .hero {
+  position: sticky;
+  top: 82px;
+  z-index: 0;
+
   min-height: calc(100vh - 82px);
   background: var(--background);
   overflow: hidden;
@@ -466,7 +472,7 @@ a {
    ========================================================= */
 
 @media (max-width: 900px) {
-  .hero-inner {
+ .hero-inner {
     grid-template-columns: 1fr;
     gap: 35px;
     padding: 45px 24px 60px;
