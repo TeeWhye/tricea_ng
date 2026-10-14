@@ -264,16 +264,6 @@ export default async function AdminOrderPage({
                 </strong>
               </div>
 
-              <div>
-                <span>Delivery</span>
-                <strong>
-                  ₦
-                  {order.deliveryFee.toLocaleString(
-                    "en-NG"
-                  )}
-                </strong>
-              </div>
-
               <div className="admin-summary-total">
                 <span>Total</span>
                 <strong>

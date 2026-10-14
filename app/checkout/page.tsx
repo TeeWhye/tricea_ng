@@ -1,10 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import type { CartItem } from "@/lib/cart";
 import { nigeriaStates } from "@/data/nigeria-states";
-import { getDeliveryFee } from "@/lib/delivery";
+
 
 type SavedAddress = {
   id: string;
@@ -17,6 +17,36 @@ type SavedAddress = {
 };
 
 export default function CheckoutPage() {
+  const [isStateMenuOpen, setIsStateMenuOpen] = useState(false);
+
+const stateDropdownRef = useRef<HTMLDivElement>(null);
+const stateTriggerRef = useRef<HTMLButtonElement>(null);
+
+useEffect(() => {
+  function handleOutsideClick(event: MouseEvent) {
+    if (
+      stateDropdownRef.current &&
+      !stateDropdownRef.current.contains(event.target as Node)
+    ) {
+      setIsStateMenuOpen(false);
+    }
+  }
+
+  function handleEscape(event: KeyboardEvent) {
+    if (event.key === "Escape") {
+      setIsStateMenuOpen(false);
+      stateTriggerRef.current?.focus();
+    }
+  }
+
+  document.addEventListener("mousedown", handleOutsideClick);
+  document.addEventListener("keydown", handleEscape);
+
+  return () => {
+    document.removeEventListener("mousedown", handleOutsideClick);
+    document.removeEventListener("keydown", handleEscape);
+  };
+}, []);
   const [orderPlaced, setOrderPlaced] = useState(false);
   const [orderNumber, setOrderNumber] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -132,11 +162,7 @@ export default function CheckoutPage() {
     return total + unitPrice * item.quantity;
   }, 0);
 
-  const deliveryFee = selectedState
-    ? getDeliveryFee(selectedState)
-    : 0;
-
-  const total = subtotal + deliveryFee;
+const total = subtotal;
 
   function handleSavedAddressSelect(addressId: string) {
     const savedAddress = savedAddresses.find(
@@ -170,11 +196,13 @@ export default function CheckoutPage() {
     const formData = new FormData(event.currentTarget);
 
     const items = cart.map((item) => ({
-      productId: item.product.id,
-      variantId: item.variantId,
-      size: item.size,
-      quantity: item.quantity,
-    }));
+  productId: item.product.id,
+  variantId: item.variantId,
+  size: item.size,
+  quantity: item.quantity,
+  colour: item.colour,
+  customSpecifications: item.customSpecifications?.trim() || "",
+}));
 
     try {
       const response = await fetch("/api/orders", {
@@ -462,32 +490,69 @@ export default function CheckoutPage() {
                     </label>
 
                     <label>
-                      <span>State</span>
+  <span>State</span>
 
-                      <select
-                        name="state"
-                        value={selectedState}
-                        onChange={(event) =>
-                          setSelectedState(
-                            event.target.value
-                          )
-                        }
-                        required
-                      >
-                        <option value="" disabled>
-                          Select your state
-                        </option>
+  <div className="checkout-state-dropdown" ref={stateDropdownRef}>
 
-                        {nigeriaStates.map((state) => (
-                          <option
-                            key={state}
-                            value={state}
-                          >
-                            {state}
-                          </option>
-                        ))}
-                      </select>
-                    </label>
+    <input
+  type="hidden"
+  name="state"
+  value={selectedState}
+/>
+    <button
+      ref={stateTriggerRef}
+      type="button"
+      className="checkout-state-select"
+      aria-label="Choose your delivery state"
+      aria-haspopup="listbox"
+      aria-expanded={isStateMenuOpen}
+      onClick={() =>
+        setIsStateMenuOpen((previous) => !previous)
+      }
+    >
+      <span>{selectedState || "Select your state"}</span>
+
+      <span
+        className={`checkout-state-chevron ${
+          isStateMenuOpen ? "is-open" : ""
+        }`}
+        aria-hidden="true"
+      >
+        ▾
+      </span>
+    </button>
+
+    {isStateMenuOpen && (
+      <div
+        className="checkout-state-menu"
+        role="listbox"
+        aria-label="Nigerian states"
+      >
+        {nigeriaStates.map((state) => (
+          <button
+            key={state}
+            type="button"
+            role="option"
+            aria-selected={selectedState === state}
+            className={`checkout-state-option ${
+              selectedState === state ? "selected" : ""
+            }`}
+            onClick={() => {
+              setSelectedState(state);
+              setIsStateMenuOpen(false);
+            }}
+          >
+            <span>{state}</span>
+
+            {selectedState === state && (
+              <span aria-hidden="true">✓</span>
+            )}
+          </button>
+        ))}
+      </div>
+    )}
+  </div>
+</label>
                   </div>
 
                   <label>
@@ -569,7 +634,11 @@ export default function CheckoutPage() {
 
                   return (
                     <div
-                      key={`${item.product.id}-${item.variantId}`}
+                      key={JSON.stringify([
+  item.variantId,
+  item.colour || "",
+  item.customSpecifications?.trim() || "",
+])}
                       className="checkout-summary-item"
                     >
                       <div className="checkout-summary-image">
@@ -592,13 +661,21 @@ export default function CheckoutPage() {
                       </div>
 
                       <div>
-                        <h3>{item.product.name}</h3>
+  <h3>{item.product.name}</h3>
 
-                        <p>
-                          Size {item.size} · Qty{" "}
-                          {item.quantity}
-                        </p>
-                      </div>
+  <p>
+    Size {item.size} · Colour {item.colour || "Not specified"}
+  </p>
+
+  <p>Qty {item.quantity}</p>
+
+  {item.customSpecifications?.trim() && (
+    <p>
+      <strong>Customisation:</strong>{" "}
+      {item.customSpecifications.trim()}
+    </p>
+  )}
+</div>
 
                       <strong>
                         ₦
@@ -618,18 +695,6 @@ export default function CheckoutPage() {
 
                 <strong>
                   ₦{subtotal.toLocaleString("en-NG")}
-                </strong>
-              </div>
-
-              <div className="checkout-total-row">
-                <span>Delivery</span>
-
-                <strong>
-                  {selectedState
-                    ? `₦${deliveryFee.toLocaleString(
-                        "en-NG"
-                      )}`
-                    : "Select state"}
                 </strong>
               </div>
 

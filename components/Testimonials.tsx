@@ -1,24 +1,24 @@
-export default function Testimonials() {
-  const testimonials = [
-    {
-      quote:
-        "The craftsmanship is beautiful. You can immediately tell that attention was paid to the smallest details.",
-      name: "Amara",
-      location: "Lagos",
-    },
-    {
-      quote:
-        "Comfortable, elegant, and easy to wear. Tricea has the kind of pieces that become part of your everyday wardrobe.",
-      name: "Daniel",
-      location: "Abuja",
-    },
-    {
-      quote:
-        "I love how the designs feel distinctly African without looking traditional or dated.",
-      name: "Tolu",
-      location: "Ibadan",
-    },
-  ];
+import { prisma } from "@/lib/prisma";
+
+export default async function Testimonials() {
+const testimonials = await prisma.testimonial.findMany({
+  where: { isPublished: true },
+  orderBy: [
+    { isFeatured: "desc" },
+    { sortOrder: "asc" },
+    { createdAt: "desc" },
+  ],
+  select: {
+    id: true,
+    customerName: true,
+    content: true,
+    productName: true,
+  },
+});
+
+  if (testimonials.length === 0) {
+    return null;
+  }
 
   return (
     <section className="testimonials">
@@ -33,25 +33,31 @@ export default function Testimonials() {
       </div>
 
       <div className="testimonials-grid">
-        {testimonials.map((testimonial, index) => (
-          <article className="testimonial-card" key={testimonial.name}>
-            <span className="testimonial-number">
-              0{index + 1}
-            </span>
+  {testimonials.map((testimonial, index) => (
+    <article
+      className="testimonial-card"
+      key={testimonial.id}
+    >
+      <span className="testimonial-number">
+        {String(index + 1).padStart(2, "0")}
+      </span>
 
-            <div className="testimonial-quote-mark">“</div>
+      <div className="testimonial-quote-mark">“</div>
 
-            <p className="testimonial-quote">
-              {testimonial.quote}
-            </p>
+      <p className="testimonial-quote">
+        {testimonial.content}
+      </p>
 
-            <div className="testimonial-author">
-              <strong>{testimonial.name}</strong>
-              <span>{testimonial.location}</span>
-            </div>
-          </article>
-        ))}
+      <div className="testimonial-author">
+        <strong>{testimonial.customerName}</strong>
+
+        {testimonial.productName && (
+          <span>{testimonial.productName}</span>
+        )}
       </div>
+    </article>
+  ))}
+</div>
     </section>
   );
 }

@@ -197,11 +197,12 @@ if (pathname.startsWith("/admin")) {
 
         {/* Desktop Navigation */}
         <nav className="navbar-links">
-          <Link href="/">Home</Link>
-          <Link href="/shop">Shop</Link>
-          <Link href="/about">About</Link>
-          <Link href="/contact">Contact</Link>
-        </nav>
+  <Link href="/">Home</Link>
+  <Link href="/shop">Shop</Link>
+  <Link href="/about">About</Link>
+  <Link href="/contact">Contact</Link>
+  <Link href="/track-order">Track Order</Link>
+</nav>
 
         {/* Desktop Actions */}
         <div className="navbar-actions">
@@ -322,6 +323,13 @@ if (pathname.startsWith("/admin")) {
           >
             Contact
           </Link>
+
+          <Link
+  href="/track-order"
+  onClick={() => setMenuOpen(false)}
+>
+  Track Order
+</Link>
 
           <div className="mobile-menu-divider" />
 

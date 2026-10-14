@@ -25,12 +25,19 @@ export type CartItem = {
   size: string;
   colour: string;
   quantity: number;
+  customSpecifications?: string;
 };
 
+/**
+ * Adds a product to the cart while preserving the customer's
+ * selected colour and customisation instructions.
+ */
 export function addToCart(
   items: CartItem[],
   product: CartProduct,
-  variantId: string
+  variantId: string,
+  selectedColour?: string,
+  customSpecifications?: string
 ): CartItem[] {
   const variant = product.variants.find(
     (item) => item.id === variantId
@@ -40,17 +47,32 @@ export function addToCart(
     return items;
   }
 
+  const requestedColour = selectedColour?.trim() || variant.colour;
+  const requestedSpecifications = customSpecifications?.trim() || "";
+
+  // Only merge cart items when their variant, selected colour,
+  // and customisation instructions are identical.
   const existingItem = items.find(
-    (item) => item.variantId === variantId
+    (item) =>
+      item.variantId === variantId &&
+      (item.colour || variant.colour) === requestedColour &&
+      (item.customSpecifications?.trim() || "") ===
+        requestedSpecifications
   );
 
   if (existingItem) {
-    if (existingItem.quantity >= variant.stock) {
+    // Count all quantities for this variant to avoid exceeding stock,
+    // including lines with different customisation requests.
+    const totalVariantQuantity = items
+      .filter((item) => item.variantId === variantId)
+      .reduce((total, item) => total + item.quantity, 0);
+
+    if (totalVariantQuantity >= variant.stock) {
       return items;
     }
 
     return items.map((item) =>
-      item.variantId === variantId
+      item === existingItem
         ? {
             ...item,
             quantity: item.quantity + 1,
@@ -59,14 +81,24 @@ export function addToCart(
     );
   }
 
+  // Do not allow separate customised lines to exceed available stock.
+  const totalVariantQuantity = items
+    .filter((item) => item.variantId === variantId)
+    .reduce((total, item) => total + item.quantity, 0);
+
+  if (totalVariantQuantity >= variant.stock) {
+    return items;
+  }
+
   return [
     ...items,
     {
-  product,
-  variantId,
-  size: variant.size,
-  colour: variant.colour,
-  quantity: 1,
-}
+      product,
+      variantId,
+      size: variant.size,
+      colour: requestedColour,
+      quantity: 1,
+      customSpecifications: requestedSpecifications,
+    },
   ];
 }

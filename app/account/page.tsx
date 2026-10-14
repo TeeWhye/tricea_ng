@@ -91,6 +91,26 @@ export default async function AccountPage() {
           </Link>
 
           <Link
+  href="/account/custom-requests"
+  className="account-dashboard-card"
+>
+  <span className="section-eyebrow">
+    CUSTOM FOOTWEAR
+  </span>
+
+  <h2>My Custom Requests</h2>
+
+  <p>
+    View your custom footwear requests, review
+    your specifications, and check their status.
+  </p>
+
+  <span className="account-dashboard-card-link">
+    View Custom Requests →
+  </span>
+</Link>
+
+          <Link
   href="/account/notifications"
   className="account-dashboard-card"
 >

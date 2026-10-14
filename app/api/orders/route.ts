@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
-import { getDeliveryFee } from "@/lib/delivery";
 import { createClient } from "@/lib/supabase/server";
+import { randomUUID } from "node:crypto";
+import { generateTrackingToken } from "@/lib/order-tracking";
 import {
   sendNewOrderEmail,
   sendOrderConfirmationEmail,
@@ -11,6 +12,8 @@ type OrderItemInput = {
   variantId: string;
   size: string;
   quantity: number;
+  colour?: string;
+  customSpecifications?: string;
 };
 
 type OrderRequest = {
@@ -30,8 +33,7 @@ function generateOrderNumber() {
     .slice(0, 10)
     .replace(/-/g, "");
 
-  const random = crypto
-    .randomUUID()
+  const random = randomUUID()
     .replace(/-/g, "")
     .slice(0, 6)
     .toUpperCase();
@@ -195,8 +197,13 @@ if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
 }
 
 const itemKeys = new Set(
-  body.items.map(
-    (item) => `${item.productId}:${item.variantId}`
+  body.items.map((item) =>
+    JSON.stringify([
+      item.productId,
+      item.variantId,
+      item.colour?.trim() || "",
+      item.customSpecifications?.trim() || "",
+    ])
   )
 );
 
@@ -227,9 +234,36 @@ item.quantity > 100
           { status: 400 }
         );
       }
-    }
 
-    const deliveryFee = getDeliveryFee(state);
+      if (
+  item.colour !== undefined &&
+  (typeof item.colour !== "string" || item.colour.length > 100)
+) {
+  return Response.json(
+    {
+      success: false,
+      message: "Invalid colour selection.",
+    },
+    { status: 400 }
+  );
+}
+
+if (
+  item.customSpecifications !== undefined &&
+  (
+    typeof item.customSpecifications !== "string" ||
+    item.customSpecifications.length > 500
+  )
+) {
+  return Response.json(
+    {
+      success: false,
+      message: "Customisation instructions must not exceed 500 characters.",
+    },
+    { status: 400 }
+  );
+}
+    }
 
     const bankSettings = await prisma.storeSetting.findMany({
   where: {
@@ -260,7 +294,13 @@ const bankDetails = {
     )?.value ?? "",
 };
 
-    const order = await prisma.$transaction(async (tx) => {
+const tracking =
+  profileId === null ? generateTrackingToken() : null;
+
+const trackingToken = tracking?.token;
+const trackingTokenHash = tracking?.tokenHash;
+
+const order = await prisma.$transaction(async (tx) => {
       let subtotal = 0;
 
       const orderItems = [];
@@ -332,29 +372,32 @@ const unitPrice = variant.price ?? product.price;
         subtotal += itemTotal;
 
         orderItems.push({
-          productId: product.id,
-          variantId: variant.id,
-          productName: product.name,
-          sku: variant.sku,
-          size: variant.size,
-          colour: variant.colour,
-          quantity: item.quantity,
-          unitPrice,
-          total: itemTotal,
-        });
+  productId: product.id,
+  variantId: variant.id,
+  productName: product.name,
+  sku: variant.sku,
+  size: variant.size,
+  colour: item.colour?.trim() || variant.colour,
+  customSpecifications:
+    item.customSpecifications?.trim() || null,
+  quantity: item.quantity,
+  unitPrice,
+  total: itemTotal,
+});
       }
 
-      const total = subtotal + deliveryFee;
+     const total = subtotal;
 
       const createdOrder = await tx.order.create({
   data: {
     profileId,
     orderNumber: generateOrderNumber(),
+    trackingTokenHash,
           status: "PENDING",
 
           subtotal,
-          deliveryFee,
-          total,
+deliveryFee: 0,
+total,
 
           fullName,
 email,
@@ -408,7 +451,7 @@ paymentAccountNumber: bankDetails.account_number,
         state: order.state,
         notes: order.notes,
         subtotal: Number(order.subtotal),
-        deliveryFee: Number(order.deliveryFee),
+        deliveryFee: 0,
         total: Number(order.total),
         paymentStatus: order.payment?.status ?? "PENDING",
         items: order.items.map((item) => ({
@@ -416,6 +459,7 @@ paymentAccountNumber: bankDetails.account_number,
           sku: item.sku,
           size: item.size,
           colour: item.colour,
+          customSpecifications: item.customSpecifications,
           quantity: item.quantity,
           unitPrice: Number(item.unitPrice),
           total: Number(item.total),
@@ -428,6 +472,7 @@ paymentAccountNumber: bankDetails.account_number,
     try {
   await sendOrderConfirmationEmail({
     orderNumber: order.orderNumber,
+    ...(trackingToken ? { trackingToken } : {}),
     fullName: order.fullName,
     email: order.email,
     phone: order.phone,
@@ -436,7 +481,7 @@ paymentAccountNumber: bankDetails.account_number,
     state: order.state,
     notes: order.notes,
     subtotal: Number(order.subtotal),
-    deliveryFee: Number(order.deliveryFee),
+     deliveryFee: 0,
     total: Number(order.total),
     paymentStatus: order.payment?.status ?? "PENDING",
    paymentBankName: bankDetails.bank_name,
@@ -447,6 +492,7 @@ paymentAccountNumber: bankDetails.account_number,
       sku: item.sku,
       size: item.size,
       colour: item.colour,
+      customSpecifications: item.customSpecifications,
       quantity: item.quantity,
       unitPrice: Number(item.unitPrice),
       total: Number(item.total),
@@ -464,7 +510,6 @@ paymentAccountNumber: bankDetails.account_number,
           id: order.id,
           orderNumber: order.orderNumber,
           subtotal: order.subtotal,
-          deliveryFee: order.deliveryFee,
           total: order.total,
           status: order.status,
           paymentStatus: order.payment?.status,

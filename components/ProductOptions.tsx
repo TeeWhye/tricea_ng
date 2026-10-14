@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 type ProductVariant = {
   id: string;
@@ -14,67 +14,96 @@ type ProductVariant = {
 type ProductOptionsProps = {
   variants: ProductVariant[];
   onVariantChange: (variantId: string | null) => void;
+  onColourChange?: (colour: string) => void;
 };
 
-function getColourSwatch(colour: string) {
-  const normalized = colour.toLowerCase().trim();
-
-  if (normalized.includes("black")) return "#1c1c1c";
-  if (normalized.includes("green")) return "#4f6b4a";
-  if (normalized.includes("olive")) return "#6b7048";
-  if (normalized.includes("brown")) return "#76533f";
-  if (normalized.includes("beige")) return "#d8c7aa";
-  if (normalized.includes("cream")) return "#eee5d3";
-  if (normalized.includes("white")) return "#f8f7f4";
-  if (normalized.includes("burgundy")) return "#64152a";
-  if (normalized.includes("red")) return "#9e2638";
-  if (normalized.includes("pink")) return "#d8a0aa";
-  if (normalized.includes("blue")) return "#526b83";
-
-  return "#b7afa9";
-}
+const AVAILABLE_COLOURS = [
+  "Black",
+  "White",
+  "Brown",
+  "Dark Brown",
+  "Cream",
+  "Beige",
+  "Tan",
+  "Grey",
+  "Red",
+  "Wine",
+  "Burgundy",
+  "Pink",
+  "Blue",
+  "Navy Blue",
+  "Green",
+  "Olive Green",
+  "Yellow",
+  "Orange",
+  "Purple",
+  "Gold",
+  "Silver",
+  "Multicolour",
+  "Other",
+];
 
 export default function ProductOptions({
   variants,
   onVariantChange,
+  onColourChange,
 }: ProductOptionsProps) {
-  const [selectedColour, setSelectedColour] = useState<string | null>(
-    null
-  );
+  const [selectedColour, setSelectedColour] = useState("");
+  const [selectedSize, setSelectedSize] = useState<string | null>(null);
+  const [isColourMenuOpen, setIsColourMenuOpen] = useState(false);
 
-  const [selectedSize, setSelectedSize] = useState<string | null>(
-    null
-  );
+  const colourDropdownRef = useRef<HTMLDivElement>(null);
+  const colourTriggerRef = useRef<HTMLButtonElement>(null);
 
-  const colours = Array.from(
-    new Set(variants.map((variant) => variant.colour))
-  ).sort();
+  const sizes = Array.from(
+    new Set(variants.map((variant) => variant.size))
+  ).sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
 
-  const filteredVariants = selectedColour
-    ? variants.filter(
-        (variant) => variant.colour === selectedColour
-      )
-    : variants;
+  useEffect(() => {
+    function handleOutsideClick(event: MouseEvent) {
+      if (
+        colourDropdownRef.current &&
+        !colourDropdownRef.current.contains(event.target as Node)
+      ) {
+        setIsColourMenuOpen(false);
+      }
+    }
 
-  const sizes =
-  colours.length > 1 && !selectedColour
-    ? []
-    : Array.from(
-        new Set(filteredVariants.map((variant) => variant.size))
-      ).sort();
+    function handleEscape(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        setIsColourMenuOpen(false);
+        colourTriggerRef.current?.focus();
+      }
+    }
+
+    document.addEventListener("mousedown", handleOutsideClick);
+    document.addEventListener("keydown", handleEscape);
+
+    return () => {
+      document.removeEventListener("mousedown", handleOutsideClick);
+      document.removeEventListener("keydown", handleEscape);
+    };
+  }, []);
 
   function handleColourSelect(colour: string) {
     setSelectedColour(colour);
     setSelectedSize(null);
+    setIsColourMenuOpen(false);
+
+    onColourChange?.(colour);
     onVariantChange(null);
   }
 
   function handleSizeSelect(size: string) {
-    const variant = filteredVariants.find(
+    const availableVariants = variants.filter(
+      (variant) => variant.stock > 0
+    );
+
+    const variant = availableVariants.find(
       (item) => item.size === size
     );
 
-    if (!variant || variant.stock <= 0) {
+    if (!variant) {
       return;
     }
 
@@ -84,73 +113,118 @@ export default function ProductOptions({
 
   return (
     <div className="product-page-option">
-      {colours.length > 0 && (
-  <div>
-    <div className="product-option-header">
-            <span>Colour</span>
-          </div>
-
-          <div className="colour-options">
-            {colours.map((colour) => (
-              <button
-                key={colour}
-                type="button"
-                className={
-                  selectedColour === colour ? "selected" : ""
-                }
-                onClick={() => handleColourSelect(colour)}
-              >
-                <span
-                  className="colour-swatch"
-                  style={{
-                    backgroundColor: getColourSwatch(colour),
-                  }}
-                />
-
-                <span>{colour}</span>
-              </button>
-            ))}
-          </div>
+      {/* Colour selection */}
+      <div className="product-colour-selection">
+        <div className="product-option-header">
+          <span>Preferred Colour</span>
         </div>
-      )}
 
-      <div className="product-option-header">
-  <span>
-    Size{selectedColour ? ` — ${selectedColour}` : ""}
-  </span>
-  <a href="/size-guide">Size Guide</a>
-</div>
+        <div
+          className="product-colour-dropdown"
+          ref={colourDropdownRef}
+        >
+          <button
+            ref={colourTriggerRef}
+            type="button"
+            className="product-colour-select"
+            aria-label="Choose your preferred footwear colour"
+            aria-haspopup="listbox"
+            aria-expanded={isColourMenuOpen}
+            onClick={() =>
+              setIsColourMenuOpen((previous) => !previous)
+            }
+          >
+            <span>
+              {selectedColour || "Select your preferred colour"}
+            </span>
 
-     <div className="size-options">
-  {colours.length > 1 && !selectedColour ? (
-    <p className="size-selection-hint">
-      Select a colour to view available sizes.
-    </p>
-  ) : (
-    sizes.map((size) => {
-      const variant = filteredVariants.find(
-        (item) => item.size === size
-      );
-
-      const isOutOfStock =
-        !variant || variant.stock <= 0;
-
-      return (
-            <button
-              key={size}
-              type="button"
-              disabled={isOutOfStock}
-              className={
-                selectedSize === size ? "selected" : ""
-              }
-              onClick={() => handleSizeSelect(size)}
+            <span
+              className={`product-colour-chevron ${
+                isColourMenuOpen ? "is-open" : ""
+              }`}
+              aria-hidden="true"
             >
-              {size}
-            </button>
-          );
-        })
-      )}
+              ▾
+            </span>
+          </button>
+
+          {isColourMenuOpen && (
+            <div
+              className="product-colour-menu"
+              role="listbox"
+              aria-label="Available colours"
+            >
+              {AVAILABLE_COLOURS.map((colour) => (
+                <button
+                  key={colour}
+                  type="button"
+                  role="option"
+                  aria-selected={selectedColour === colour}
+                  className={`product-colour-option ${
+                    selectedColour === colour ? "selected" : ""
+                  }`}
+                  onClick={() => handleColourSelect(colour)}
+                >
+                  <span>{colour}</span>
+
+                  {selectedColour === colour && (
+                    <span aria-hidden="true">✓</span>
+                  )}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <p className="product-option-hint">
+          Can&apos;t find your preferred colour? Select Other and
+          describe the colour you want in the Customisation &amp;
+          Special Requests box below.
+        </p>
+      </div>
+
+      {/* Size selection */}
+      <div className="product-option-header">
+        <span>Size</span>
+        <a href="/size-guide">Size Guide</a>
+      </div>
+
+      <div className="size-options">
+        {sizes.length === 0 ? (
+          <p className="size-selection-hint">
+            No sizes are currently listed for this product. You can
+            request your preferred size in the customisation box below.
+          </p>
+        ) : (
+          sizes.map((size) => {
+            const availableVariant = variants.find(
+              (item) => item.size === size && item.stock > 0
+            );
+
+            const isOutOfStock = !availableVariant;
+
+            return (
+              <button
+                key={size}
+                type="button"
+                disabled={isOutOfStock}
+                className={selectedSize === size ? "selected" : ""}
+                onClick={() => handleSizeSelect(size)}
+                aria-pressed={selectedSize === size}
+              >
+                {size}
+              </button>
+            );
+          })
+        )}
+      </div>
+
+      <p className="product-option-hint">
+        <strong>Need a different size?</strong> No problem! If your
+        preferred size isn&apos;t listed above, let us know in the
+        Customisation &amp; Special Requests box below. We&apos;ll
+        review your request and confirm availability.
+      </p>
     </div>
-  </div>
-);
+  );
 }

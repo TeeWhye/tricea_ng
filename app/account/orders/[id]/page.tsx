@@ -164,13 +164,6 @@ export default async function OrderDetailPage({
               </strong>
             </div>
 
-            <div className="account-order-summary-row">
-              <span>Delivery</span>
-              <strong>
-                ₦{order.deliveryFee.toLocaleString("en-NG")}
-              </strong>
-            </div>
-
             <div className="account-order-summary-total">
               <span>Total</span>
               <strong>

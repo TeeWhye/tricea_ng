@@ -5,6 +5,14 @@ import Link from "next/link";
 import type { CartItem as CartItemType } from "@/lib/cart";
 import CartItem from "@/components/CartItem";
 
+function getCartItemKey(item: CartItemType) {
+  return JSON.stringify([
+    item.variantId,
+    item.colour || "",
+    item.customSpecifications?.trim() || "",
+  ]);
+}
+
 export default function CartPage() {
   const [cart, setCart] = useState<CartItemType[]>([]);
 
@@ -12,47 +20,78 @@ export default function CartPage() {
     const storedCart = localStorage.getItem("tricea-cart");
 
     if (storedCart) {
-      setCart(JSON.parse(storedCart));
+      try {
+        const parsedCart: CartItemType[] = JSON.parse(storedCart);
+
+        if (Array.isArray(parsedCart)) {
+          setCart(parsedCart);
+        }
+      } catch {
+        setCart([]);
+      }
     }
   }, []);
 
   function updateQuantity(
-  variantId: string,
-  quantity: number
-) {
-  const cartItem = cart.find(
-    (item) => item.variantId === variantId
-  );
+    cartItemKey: string,
+    quantity: number
+  ) {
+    const cartItem = cart.find(
+      (item) => getCartItemKey(item) === cartItemKey
+    );
 
-  if (!cartItem) {
-    return;
+    if (!cartItem) {
+      return;
+    }
+
+    const variant = cartItem.product.variants.find(
+      (item) => item.id === cartItem.variantId
+    );
+
+    if (!variant) {
+      return;
+    }
+
+    // Do not allow the quantity of this variant to exceed its stock.
+    const quantityOfOtherLines = cart
+      .filter(
+        (item) =>
+          item.variantId === cartItem.variantId &&
+          getCartItemKey(item) !== cartItemKey
+      )
+      .reduce((total, item) => total + item.quantity, 0);
+
+    if (quantity + quantityOfOtherLines > variant.stock) {
+      return;
+    }
+
+    const updatedCart = cart
+      .map((item) =>
+        getCartItemKey(item) === cartItemKey
+          ? { ...item, quantity }
+          : item
+      )
+      .filter((item) => item.quantity > 0);
+
+    setCart(updatedCart);
+
+    localStorage.setItem(
+      "tricea-cart",
+      JSON.stringify(updatedCart)
+    );
+
+    window.dispatchEvent(new Event("cart-updated"));
   }
 
-  const variant = cartItem.product.variants.find(
-    (item) => item.id === variantId
-  );
+  const subtotal = cart.reduce((total, item) => {
+    const variant = item.product.variants.find(
+      (itemVariant) => itemVariant.id === item.variantId
+    );
 
-  if (!variant) {
-    return;
-  }
+    const unitPrice = variant?.price ?? item.product.price;
 
-  if (quantity > variant.stock) {
-    return;
-  }
-
-  const updatedCart = cart
-    .map((item) =>
-      item.variantId === variantId
-        ? { ...item, quantity }
-        : item
-    )
-    .filter((item) => item.quantity > 0);
-
-  setCart(updatedCart);
-localStorage.setItem("tricea-cart", JSON.stringify(updatedCart));
-
-window.dispatchEvent(new Event("cart-updated"));
-}
+    return total + unitPrice * item.quantity;
+  }, 0);
 
   if (cart.length === 0) {
     return (
@@ -67,10 +106,7 @@ window.dispatchEvent(new Event("cart-updated"));
             Tricea collection.
           </p>
 
-          <Link
-            href="/shop"
-            className="cart-shop-button"
-          >
+          <Link href="/shop" className="cart-shop-button">
             Explore the Collection <span>→</span>
           </Link>
         </div>
@@ -91,69 +127,44 @@ window.dispatchEvent(new Event("cart-updated"));
           </h1>
         </div>
 
-      <div className="cart-content">
-  <div className="cart-items">
-    {cart.map((item) => (
-      <CartItem
-        key={item.variantId}
-        item={item}
-        onUpdateQuantity={updateQuantity}
-      />
-    ))}
-  </div>
+        <div className="cart-content">
+          <div className="cart-items">
+            {cart.map((item) => (
+              <CartItem
+                key={getCartItemKey(item)}
+                item={item}
+                onUpdateQuantity={updateQuantity}
+              />
+            ))}
+          </div>
 
-  <div className="cart-summary">
-    <div className="cart-summary-row">
-      <span>Subtotal</span>
+          <div className="cart-summary">
+            <div className="cart-summary-row">
+              <span>Subtotal</span>
 
-      <strong>
-        ₦
-       {cart
-  .reduce((total, item) => {
-    const variant = item.product.variants.find(
-      (itemVariant) => itemVariant.id === item.variantId
-    );
+              <strong>
+                ₦{subtotal.toLocaleString("en-NG")}
+              </strong>
+            </div>
 
-    const unitPrice =
-      variant?.price ?? item.product.price;
+            <div className="cart-summary-divider" />
 
-    return total + unitPrice * item.quantity;
-  }, 0)
-  .toLocaleString("en-NG")}
-      </strong>
-    </div>
+            <div className="cart-summary-total">
+              <span>Total</span>
 
-    <div className="cart-summary-row">
-      <span>Delivery</span>
-      <span>Calculated at checkout</span>
-    </div>
+              <strong>
+                ₦{subtotal.toLocaleString("en-NG")}
+              </strong>
+            </div>
 
-    <div className="cart-summary-divider" />
-
-    <div className="cart-summary-total">
-      <span>Total</span>
-
-      <strong>
-        ₦
-        {cart
-          .reduce(
-            (total, item) =>
-              total +
-              item.product.price * item.quantity,
-            0
-          )
-          .toLocaleString("en-NG")}
-      </strong>
-    </div>
-
-    <Link
-      href="/checkout"
-      className="cart-checkout-button"
-    >
-      Proceed to Checkout <span>→</span>
-    </Link>
-  </div>
-</div>
+            <Link
+              href="/checkout"
+              className="cart-checkout-button"
+            >
+              Proceed to Checkout <span>→</span>
+            </Link>
+          </div>
+        </div>
       </div>
     </main>
   );

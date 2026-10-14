@@ -9,6 +9,7 @@ import {
   LayoutDashboard,
   LogOut,
   Menu,
+  MessageSquareQuote,
   Settings,
   Tag,
   Users,
@@ -88,6 +89,11 @@ export default function AdminShell({
             <span>Orders</span>
           </Link>
 
+          <Link href="/admin/testimonials">
+  <MessageSquareQuote size={18} strokeWidth={1.6} />
+  <span>Testimonials</span>
+</Link>
+
           <Link href="/admin/categories">
             <Tag size={18} strokeWidth={1.6} />
             <span>Categories</span>
@@ -155,6 +161,14 @@ export default function AdminShell({
               <ClipboardList size={19} strokeWidth={1.6} />
               <span>Orders</span>
             </Link>
+
+            <Link
+  href="/admin/testimonials"
+  onClick={closeMobileMenu}
+>
+  <MessageSquareQuote size={19} strokeWidth={1.6} />
+  <span>Testimonials</span>
+</Link>
 
             <Link
               href="/admin/categories"
